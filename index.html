@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Sky Runner 3D</title>
     <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+</head>
+<body>
     <div id="hud">
-      <div class="panel">
-        <span>Score</span>
-        <strong id="score">0</strong>
-      </div>
-      <div class="panel">
-        <span>Health</span>
-        <strong id="health">100</strong>
-      </div>
+        <div class="panel">
+            <span>Score</span>
+            <strong id="score">0</strong>
+        </div>
+        <div class="panel">
+            <span>Health</span>
+            <strong id="health">100</strong>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div id="joystick-container">
+            <div id="joystick-bg"></div>
+            <div id="joystick-stick"></div>
+        </div>
+        <button id="jump-btn">JUMP</button>
     </div>
 
     <div id="overlay" class="visible">
-      <div class="card">
-        <h1>Sky Runner 3D</h1>
-        <p>Собирай кристаллы. Уклоняйся от врагов. Выживи как можно дольше.</p>
-        <ul>
-          <li>WASD / Стрелки — движение</li>
-          <li>Space — прыжок</li>
-          <li>R — перезапуск</li>
-        </ul>
-        <button id="start-btn">Начать игру</button>
-      </div>
+        <div class="card">
+            <h1>Sky Runner 3D</h1>
+            <p>Собирай кристаллы. Уклоняйся от врагов. Выживи как можно дольше.</p>
+            <ul>
+                <li>🕹️ Джойстик — движение</li>
+                <li>🔘 Кнопка — прыжок</li>
+                <li>R — перезапуск</li>
+            </ul>
+            <button id="start-btn">Начать игру</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="game.js"></script>
-  </body>
+</body>
 </html>
