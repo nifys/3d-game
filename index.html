@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sky Runner 3D</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="hud">
+      <div class="panel">
+        <span>Score</span>
+        <strong id="score">0</strong>
+      </div>
+      <div class="panel">
+        <span>Health</span>
+        <strong id="health">100</strong>
+      </div>
+    </div>
+
+    <div id="overlay" class="visible">
+      <div class="card">
+        <h1>Sky Runner 3D</h1>
+        <p>Собирай кристаллы. Уклоняйся от врагов. Выживи как можно дольше.</p>
+        <ul>
+          <li>WASD / Стрелки — движение</li>
+          <li>Space — прыжок</li>
+          <li>R — перезапуск</li>
+        </ul>
+        <button id="start-btn">Начать игру</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
+ 
