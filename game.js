@@ -21,12 +21,17 @@ const scoreEl = document.getElementById('score');
 const healthEl = document.getElementById('health');
 const overlayEl = document.getElementById('overlay');
 const startBtn = document.getElementById('start-btn');
+const jumpBtn = document.getElementById('jump-btn');
+const joystickContainer = document.getElementById('joystick-container');
+const joystickStick = document.getElementById('joystick-stick');
 
 let score = 0;
 let wave = 1;
 let started = false;
 let gameOver = false;
-let lastTime = 0;
+let joystickX = 0;
+let joystickY = 0;
+let joystickActive = false;
 
 const player = {
   x: 0,
@@ -37,6 +42,112 @@ const player = {
   health: 100,
   radius: 1.2,
 };
+
+// Джойстик
+function updateJoystickStick() {
+  const radius = joystickContainer.offsetWidth / 2;
+  const maxDistance = radius - 25;
+  let x = joystickX;
+  let y = joystickY;
+  const distance = Math.hypot(x, y);
+
+  if (distance > maxDistance) {
+    const angle = Math.atan2(y, x);
+    x = Math.cos(angle) * maxDistance;
+    y = Math.sin(angle) * maxDistance;
+  }
+
+  joystickStick.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+  joystickX = x;
+  joystickY = y;
+}
+
+joystickContainer.addEventListener('touchstart', (e) => {
+  joystickActive = true;
+  const touch = e.touches[0];
+  const rect = joystickContainer.getBoundingClientRect();
+  joystickX = touch.clientX - rect.left - rect.width / 2;
+  joystickY = touch.clientY - rect.top - rect.height / 2;
+  updateJoystickStick();
+});
+
+joystickContainer.addEventListener('touchmove', (e) => {
+  if (!joystickActive) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = joystickContainer.getBoundingClientRect();
+  joystickX = touch.clientX - rect.left - rect.width / 2;
+  joystickY = touch.clientY - rect.top - rect.height / 2;
+  updateJoystickStick();
+});
+
+joystickContainer.addEventListener('touchend', () => {
+  joystickActive = false;
+  joystickX = 0;
+  joystickY = 0;
+  updateJoystickStick();
+});
+
+joystickContainer.addEventListener('mousemove', (e) => {
+  if (!e.buttons) return;
+  const rect = joystickContainer.getBoundingClientRect();
+  joystickX = e.clientX - rect.left - rect.width / 2;
+  joystickY = e.clientY - rect.top - rect.height / 2;
+  updateJoystickStick();
+});
+
+joystickContainer.addEventListener('mousedown', (e) => {
+  joystickActive = true;
+  const rect = joystickContainer.getBoundingClientRect();
+  joystickX = e.clientX - rect.left - rect.width / 2;
+  joystickY = e.clientY - rect.top - rect.height / 2;
+  updateJoystickStick();
+});
+
+document.addEventListener('mouseup', () => {
+  joystickActive = false;
+  joystickX = 0;
+  joystickY = 0;
+  updateJoystickStick();
+});
+
+// Кнопка прыжка
+jumpBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (started && !gameOver && player.y <= 1.5) {
+    player.vy = 9.5;
+  }
+});
+
+jumpBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  if (started && !gameOver && player.y <= 1.5) {
+    player.vy = 9.5;
+  }
+});
+
+// Клавиатура
+window.addEventListener('keydown', (event) => {
+  keys[event.code] = true;
+
+  if (event.code === 'Space' && !event.repeat) {
+    if (!started && !gameOver) {
+      startGame();
+    }
+    if (started && player.y <= 1.5) {
+      player.vy = 9.5;
+    }
+  }
+
+  if (event.code === 'KeyR' && gameOver) {
+    resetMatch();
+    startGame();
+  }
+});
+
+window.addEventListener('keyup', (event) => {
+  keys[event.code] = false;
+});
 
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
@@ -211,7 +322,7 @@ function endGame() {
     <div class="card">
       <h1>Game Over</h1>
       <p>Ты набрал <strong>${score}</strong> очков.</p>
-      <p>Нажми R или кнопку ниже, чтобы начать заново.</p>
+      <p>Нажми кнопку ниже, чтобы начать заново.</p>
       <button id="start-btn">Играть снова</button>
     </div>
   `;
@@ -221,29 +332,6 @@ function endGame() {
     startGame();
   });
 }
-
-window.addEventListener('keydown', (event) => {
-  keys[event.code] = true;
-
-  if (event.code === 'Space' && !event.repeat) {
-    if (!started && !gameOver) {
-      startGame();
-    }
-
-    if (player.y <= 1.5) {
-      player.vy = 9.5;
-    }
-  }
-
-  if (event.code === 'KeyR' && gameOver) {
-    resetMatch();
-    startGame();
-  }
-});
-
-window.addEventListener('keyup', (event) => {
-  keys[event.code] = false;
-});
 
 startBtn.addEventListener('click', () => {
   startGame();
@@ -256,8 +344,20 @@ window.addEventListener('resize', () => {
 });
 
 function updatePlayer(dt) {
-  const moveX = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
-  const moveZ = (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0);
+  // Джойстик
+  const maxDistance = 40;
+  const joyDist = Math.hypot(joystickX, joystickY);
+  let moveX = 0;
+  let moveZ = 0;
+
+  if (joyDist > 5) {
+    moveX = (joystickX / maxDistance) * 1.5;
+    moveZ = (joystickY / maxDistance) * 1.5;
+  }
+
+  // Клавиатура
+  moveX += (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+  moveZ += (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0);
 
   let dx = moveX;
   let dz = moveZ;
